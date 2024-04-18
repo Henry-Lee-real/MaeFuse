@@ -1,5 +1,5 @@
 # MaeFuse
-Official implementation of MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training
+Official implementation of **MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training**
 
 *arxiv link:* https://arxiv.org/abs/2404.11016
 
