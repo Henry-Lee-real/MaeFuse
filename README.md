@@ -12,5 +12,9 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 ## Version II
 version 2 will be launched soon. Looking forward to your ⭐！
-[演示文稿1.pdf](https://github.com/Henry-Lee-real/MaeFuse/files/15063451/1.pdf)
+
+![演示文稿1](https://github.com/Henry-Lee-real/MaeFuse/assets/92620880/6144c130-d623-491c-b376-09ec9adb5cbd)
+
+
+
 
