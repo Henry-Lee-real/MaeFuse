@@ -19,6 +19,13 @@ version 2 will be launched soon. Looking forward to your ⭐！
 
 ## How to use
 
+**Setup**: Ensure you have Python 3.10 installed. Use the following command to initialize the environment:
+
+```bash
+pip install -r requirements.txt
+```
+
+
 **Note**: The dataset directory specified in `--address` must contain two subdirectories named `vi` and `ir` that contain visible and infrared images respectively.
 
 To use this script, you need to provide the following command-line arguments:
@@ -30,7 +37,7 @@ To use this script, you need to provide the following command-line arguments:
 ### Example Command
 
 ```bash
-python script.py --checkpoint final_new_60.pth --address TNO_dataset --output TNO_55_final_2
+python test_fusion.py --checkpoint final_new_60.pth --address TNO_dataset --output TNO_55_final_2
 ```
 
 ### Description of Arguments
@@ -39,7 +46,6 @@ python script.py --checkpoint final_new_60.pth --address TNO_dataset --output TN
 - `--address`: This argument specifies the directory containing the dataset, which should include both visible and infrared images.
 - `--output`: This argument specifies the directory where the fused output images will be saved. If the directory does not exist, it will be created automatically.
 
-The script will read images from the provided dataset directory, perform the fusion operation using the loaded model, and save the results to the specified output folder.
 
 
 
