@@ -5,7 +5,7 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 if you want to test on your datasets(email:lijiayang.cs@gmail.com) you can get the wight for the code!
 
-**Core Concept**: 
+## **Core Concept**: 
 
 The mainstream approach often uses downstream tasks to drive fusion, resulting in more explicit object information in the fusion results. However, this leads to increased complexity and overfitting issues. Our core idea is that such complex downstream tasks are unnecessary. Instead, using a pre-trained encoder with high-level semantic information, such as MAE, can solve all problems effectively. The Fig.1 below explains this well. While we use MAE as the pre-trained encoder, you could also use other encoders with better performance, such as VAE.
 
