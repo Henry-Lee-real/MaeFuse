@@ -18,7 +18,7 @@ from pathlib import Path
 
 import torch
 import torch.distributed as dist
-from torch._six import inf
+#from torch._six import inf
 
 
 class SmoothedValue(object):
@@ -285,7 +285,7 @@ def get_grad_norm_(parameters, norm_type: float = 2.0) -> torch.Tensor:
     if len(parameters) == 0:
         return torch.tensor(0.)
     device = parameters[0].grad.device
-    if norm_type == inf:
+    if norm_type == torch.tensor(float('inf')):
         total_norm = max(p.grad.detach().abs().max().to(device) for p in parameters)
     else:
         total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]), norm_type)
@@ -312,6 +312,7 @@ def save_model(args, epoch, model, model_without_ddp, optimizer, loss_scaler):
         model.save_checkpoint(save_dir=args.output_dir, tag="checkpoint-%s" % epoch_name, client_state=client_state)
 
 
+
 def load_model(args, model_without_ddp, optimizer, loss_scaler):
     if args.resume:
         if args.resume.startswith('https'):
@@ -319,14 +320,20 @@ def load_model(args, model_without_ddp, optimizer, loss_scaler):
                 args.resume, map_location='cpu', check_hash=True)
         else:
             checkpoint = torch.load(args.resume, map_location='cpu')
-        model_without_ddp.load_state_dict(checkpoint['model'])
+        model_dict = model_without_ddp.state_dict()
+        ignore_layers = ['pos_embed', 'decoder_pos_embed']
+        # 创建一个新的字典，用于加载权重，忽略在ignore_layers中指定的权重
+        load_dict = {k: v for k, v in checkpoint['model'].items() if k not in ignore_layers}
+        model_dict.update(load_dict)
+        model_without_ddp.load_state_dict(model_dict,strict=False)
+        # model_without_ddp.load_state_dict(checkpoint['model'],strict=False)
         print("Resume checkpoint %s" % args.resume)
-        if 'optimizer' in checkpoint and 'epoch' in checkpoint and not (hasattr(args, 'eval') and args.eval):
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            args.start_epoch = checkpoint['epoch'] + 1
-            if 'scaler' in checkpoint:
-                loss_scaler.load_state_dict(checkpoint['scaler'])
-            print("With optim & sched!")
+        # if 'optimizer' in checkpoint and 'epoch' in checkpoint and not (hasattr(args, 'eval') and args.eval):
+        #     optimizer.load_state_dict(checkpoint['optimizer'],strict=False)
+        #     args.start_epoch = checkpoint['epoch'] + 1
+        #     if 'scaler' in checkpoint:
+        #         loss_scaler.load_state_dict(checkpoint['scaler'],strict=False)
+        #     print("With optim & sched!")
 
 
 def all_reduce_mean(x):

@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import os
 
 import fusion
-from downstream_net import ConnectModel_decoder4
+from connect_net import ConnectModel_MAE_Fuion
 from util.trans import trans_img
 from util.load_data import *
 from tqdm import tqdm
@@ -51,12 +51,8 @@ def normalize_image(img):
 def load_model():
     model = prepare_model(arch="mae_decoder_4_640")
     fusion_layer = fusion.cross_fusion(embed_dim=1024)
-    checkpoint = torch.load("checkpoint14.pth", map_location='cpu')
-    # model.load_state_dict(checkpoint['model'], strict=True)
-    # model = model.to(device)
-    # model.eval()
-    # return model
-    connect = ConnectModel_decoder4(model,fusion_layer)
+    checkpoint = torch.load("final_new_60.pth", map_location='cpu')
+    connect = ConnectModel_MAE_Fuion(model,fusion_layer)
     connect.load_state_dict(checkpoint['model'], strict=True)
     connect = connect.to(device)
     connect.eval()
@@ -68,14 +64,14 @@ if __name__ == '__main__':
 
     connect = load_model()
     
-    address = "MSRS-main\\train"
+    address = "TNO_dataset"
     
     names = get_address(address)
     type = get_image_type(names[0],address+"/vi/")
 
 
 
-    folder_path = "MSRS_train_AB_14_en18"
+    folder_path = "TNO_55_final_2"
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -83,7 +79,6 @@ if __name__ == '__main__':
     transform_to_pil = transforms.ToPILImage()
 
     for name in tqdm(names):
-        
         img_vi = cv2.imread(address+'/vi/'+ name + type)
         img_ir = cv2.imread(address+'/ir/'+ name + type)
         img_vi_ycrcb = cv2.cvtColor(img_vi, cv2.COLOR_BGR2YCrCb)
@@ -92,8 +87,8 @@ if __name__ == '__main__':
         img_ir = cv2.cvtColor(img_ir, cv2.COLOR_BGR2RGB)
         h,w,_ = img_vi.shape
         target_size = (w, h)
-        
-        
+                
+                
         img_vi = cv2.resize(img_vi,(640,640),cv2.INTER_CUBIC)
         img_ir = cv2.resize(img_ir,(640,640),cv2.INTER_CUBIC)
 
@@ -115,8 +110,8 @@ if __name__ == '__main__':
         pred = pred.numpy()
         pred = cv2.convertScaleAbs(pred)
         y = cv2.cvtColor(pred, cv2.COLOR_RGB2GRAY)
-        # img_vi_ycrcb = cv2.resize(img_vi_ycrcb,(640,640),cv2.INTER_CUBIC) # type: ignore
-        # img_vi_ycrcb[:,:,0] = y
-        # out1 = cv2.cvtColor(img_vi_ycrcb, cv2.COLOR_YCrCb2BGR)
-        out = cv2.resize(y,target_size,interpolation=cv2.INTER_CUBIC)
+        img_vi_ycrcb = cv2.resize(img_vi_ycrcb,(640,640),cv2.INTER_CUBIC) # type: ignore
+        img_vi_ycrcb[:,:,0] = y
+        out = cv2.cvtColor(img_vi_ycrcb, cv2.COLOR_YCrCb2BGR)
+        out = cv2.resize(out,target_size,interpolation=cv2.INTER_CUBIC)
         cv2.imwrite(path,out)
