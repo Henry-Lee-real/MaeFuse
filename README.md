@@ -25,6 +25,8 @@ version 2 will be launched soon. Looking forward to your ⭐！
 pip install -r requirements.txt
 ```
 
+**Weight**: https://drive.google.com/file/d/18N6tn78VztQOvobVWu6J-RJHo3jsBKkk/view?usp=sharing
+
 
 **Note**: The dataset directory specified in `--address` must contain two subdirectories named `vi` and `ir` that contain visible and infrared images respectively.
 
@@ -37,7 +39,7 @@ To use this script, you need to provide the following command-line arguments:
 ### Example Command
 
 ```bash
-python test_fusion.py --checkpoint final_new_60.pth --address TNO_dataset --output TNO_55_final_2
+python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --output path_to_output
 ```
 
 ### Description of Arguments
