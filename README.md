@@ -3,7 +3,7 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 *arxiv link:* https://arxiv.org/abs/2404.11016
 
-if you want to test on your datasets(email:lijiayang.cs@gmail.com) you can get the wight for the code!
+Any questions can be consulted -> (Email:lijiayang.cs@gmail.com)
 
 ## **Core Concept**: 
 
