@@ -58,8 +58,16 @@ python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --ou
 - `--address`: This argument specifies the directory containing the dataset, which should include both visible and infrared images.
 - `--output`: This argument specifies the directory where the fused output images will be saved. If the directory does not exist, it will be created automatically.
 
+### Citation
+```
+@article{li2025maefuse,
+  title={{MaeFuse}: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training},
+  author={Jiayang Li and Junjun Jiang and Pengwei Liang and Jiayi Ma and Liqiang Nie},
+  journal={IEEE Transactions on Image Processing},
+  year={2025},
+  publisher={IEEE}
+}
 
-
-
+```
 
 
