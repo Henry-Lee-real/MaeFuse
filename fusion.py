@@ -115,42 +115,33 @@ class Feature_Net(nn.Module):
 class cross_fusion(nn.Module):  #tradition cross*2
     def __init__(self,embed_dim):
         super(cross_fusion, self).__init__()
-        # self.weight_model = SelfAttention(embed_dim = embed_dim, num_heads = 16)
-        #self.weight_model_2 = SelfAttention(embed_dim = embed_dim, num_heads = 16)
-        # self.vi_model       = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)#
-        # self.ir_model       = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)
-        self.cross_model = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)#
-        #self.cross_model_vi = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)#
-        #self.cross_model_ir = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)#
+        self.cross_model = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)
         self.merge_model = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)
         self.pos_embed = nn.Parameter(torch.zeros(1, 1600, embed_dim), requires_grad=False) 
         self.embed_dim = embed_dim
-        # for param in self.cross_model.parameters():
-        #     param.requires_grad = False
-        # for param in self.cross_model_ir.parameters():
-        #     param.requires_grad = False
+        self.fc1 = nn.Linear(self.embed_dim, self.embed_dim*4, bias=True)
+        self.fc2 = nn.Linear(self.embed_dim*4, self.embed_dim, bias=True)
+        self.gelu = nn.GELU()
+        self.ln = nn.LayerNorm(self.embed_dim)
         self.initialize_weights()
         
     def initialize_weights(self):
         pos_embed = get_2d_sincos_pos_embed(self.embed_dim, 40, cls_token=False)
         self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
 
-    def forward(self, vi_latent, ir_latent):#, com_latent
-        #num         = vi_latent.shape[1]
+    def forward(self, vi_latent, ir_latent):
         vi_latent += self.pos_embed
         ir_latent += self.pos_embed
-        # latent      = torch.cat((vi_latent, ir_latent), dim=1)
-        # weight       = self.weight_model(latent)
-        # vi_weight   = weight[:,:num,:]
-        # ir_weight   = weight[:,num:,:]
         vi_patten,_  = self.cross_model(ir_latent,vi_latent,vi_latent)  #q,k,v
         ir_patten,_  = self.cross_model(vi_latent,ir_latent,ir_latent)
         patten = vi_patten + ir_patten
         vi_final,_   = self.merge_model(patten,vi_latent,vi_latent)
         ir_final,_   = self.merge_model(patten,ir_latent,ir_latent)
         fusion    = (vi_final + ir_final)
+        ffn = self.fc2(self.gelu(self.fc1(fusion)))
+        out = self.ln(ffn+fusion)
         
-        return fusion#, (vi_latent+ir_latent)/2#, ir_latent#vi_final+ir_final#fusion#, vi_weight, ir_weight
+        return out
     
 class Seg_module(nn.Module):
     def __init__(self, embed_dim, img_size):
