@@ -60,13 +60,14 @@ python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --ou
 
 ### Citation
 ```
-@article{li2025maefuse,
-  title={{MaeFuse}: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training},
-  author={Jiayang Li and Junjun Jiang and Pengwei Liang and Jiayi Ma and Liqiang Nie},
-  journal={IEEE Transactions on Image Processing},
+@ARTICLE{10893688,
+  author={Li, Jiayang and Jiang, Junjun and Liang, Pengwei and Ma, Jiayi and Nie, Liqiang},
+  journal={IEEE Transactions on Image Processing}, 
+  title={MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training}, 
   year={2025},
-  publisher={IEEE}
+  doi={10.1109/TIP.2025.3541562}
 }
+
 
 ```
 
