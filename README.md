@@ -63,10 +63,15 @@ python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --ou
 @ARTICLE{10893688,
   author={Li, Jiayang and Jiang, Junjun and Liang, Pengwei and Ma, Jiayi and Nie, Liqiang},
   journal={IEEE Transactions on Image Processing}, 
-  title={MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training}, 
+  title={MaeFuse: Transferring Omni Features With Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training}, 
   year={2025},
+  volume={34},
+  number={},
+  pages={1340-1353},
+  keywords={Feature extraction;Visualization;Training;Image fusion;Data mining;Transformers;Semantics;Deep learning;Lighting;Image color analysis;Image fusion;vision transformer;masked autoencoder;guided training},
   doi={10.1109/TIP.2025.3541562}
 }
+
 
 
 ```
