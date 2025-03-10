@@ -14,11 +14,7 @@ The mainstream approach often uses downstream tasks to drive fusion, resulting i
 
 Fig.1 Visualization results of the average fusion of feature vectors from different layers of the two modalities.
 
-
-## Abstract
-> In this research, we introduce MaeFuse, a novel autoencoder model designed for infrared and visible image fusion (IVIF). The existing approaches for image fusion often rely on training combined with downstream tasks to obtain high-level visual information, which is effective in emphasizing target objects and delivering impressive results in visual quality and task-specific applications. MaeFuse, however, deviates from the norm. Instead of being driven by downstream tasks, our model utilizes a pretrained encoder from Masked Autoencoders (MAE), which facilities the omni features extraction for low-level reconstruction and high-level vision tasks, to obtain perception friendly features with a low cost. In order to eliminate the domain gap of different modal features and the block effect caused by the MAE encoder, we further develop a guided training strategy. This strategy is meticulously crafted to ensure that the fusion layer seamlessly adjusts to the feature space of the encoder, gradually enhancing the fusion effect. It facilitates the comprehensive integration of feature vectors from both infrared and visible modalities, preserving the rich details inherent in each. MaeFuse not only introduces a novel perspective in the realm of fusion techniques but also stands out with impressive performance across various public datasets.
-
-## Compare
+## Version I
 
 ![image](https://github.com/Henry-Lee-real/MaeFuse/assets/92620880/945d5ac0-5f88-4363-a34b-c8321276ba06)
 
@@ -34,8 +30,9 @@ version 2 will be launched soon. Looking forward to your ⭐！
 ```bash
 pip install -r requirements.txt
 ```
+**Pre-train Weight for MAE**(resume): https://drive.google.com/file/d/16YnXfUeqBbSprhWV1OygriAsr2y9cCcf/view?usp=sharing
 
-**Weight**: https://drive.google.com/file/d/18N6tn78VztQOvobVWu6J-RJHo3jsBKkk/view?usp=sharing
+**Test Weight**: https://drive.google.com/file/d/18N6tn78VztQOvobVWu6J-RJHo3jsBKkk/view?usp=sharing
 
 
 **Note**: The dataset directory specified in `--address` must contain two subdirectories named `vi` and `ir` that contain visible and infrared images respectively.
@@ -46,7 +43,13 @@ To use this script, you need to provide the following command-line arguments:
 2. `--address`: Path to the dataset directory (e.g., `TNO_dataset`).
 3. `--output`: Path to the folder where output images will be saved.
 
-### Example Command
+### Train Command
+**Note**: For details on training code usage, refer to the internal documentation in `train.py`.
+```bash
+python train.py
+```
+
+### Test Command
 
 ```bash
 python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --output path_to_output
@@ -71,9 +74,6 @@ python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --ou
   keywords={Feature extraction;Visualization;Training;Image fusion;Data mining;Transformers;Semantics;Deep learning;Lighting;Image color analysis;Image fusion;vision transformer;masked autoencoder;guided training},
   doi={10.1109/TIP.2025.3541562}
 }
-
-
-
 ```
 
 
