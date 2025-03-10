@@ -34,10 +34,10 @@ def get_args_parser():
 
     # Model parameters
     parser.add_argument('--model', default='mae_decoder_4_640', type=str, metavar='MODEL',
-                        help='Name of model to train')#EFD:mae_encoder #tradition:mae_decoder_4_640 
+                        help='Model Architecture')
 
     parser.add_argument('--input_size', default=640, type=int,
-                        help='images input size')
+                        help='images input size LOCK!!!')
 
     parser.add_argument('--norm_pix_loss', action='store_true',
                         help='Use (per-patch) normalized pixels as targets for computing loss')
@@ -61,18 +61,18 @@ def get_args_parser():
     parser.add_argument('--data_path', default='path/to/your/data', type=str,
                         help='dataset path')
 
-    parser.add_argument('--output_dir', default='path/to/your/output_dir',#m3fd_20_finetune_lapas_1
-                        help='path where to save, empty for no saving')#cross_ffn_1_2_TRAIN_NEW_open_32
+    parser.add_argument('--output_dir', default='path/to/your/output_dir',
+                        help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default='./TMP',
                         help='path where to tensorboard log')
     parser.add_argument('--device', default='cuda:0,1,2,3,4,5,6,7',
-                        help='device to use for training / testing')
+                        help='device to use for training')
     parser.add_argument('--seed', default=0, type=int)
 
     parser.add_argument('--resume', default='output_decoder_4_640/checkpoint-50.pth',
-                        help='resume from checkpoint')
+                        help='Pre-training ckpt for MAE(4 layers decoder)')
     parser.add_argument('--fusion_weight', default='path/to/fusion/layer/wegt',
-                        help='resume from checkpoint')#fusion_layer/checkpoint9.pth
+                        help='ckpt for fusion layer (w/o)')
     
 
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
@@ -138,9 +138,8 @@ def train(args):
     #load_data
     matching_dataset = MatchingImageDataset_GRAY(root_dir=args.data_path, transform=data_transform)
     train_loader = DataLoader(matching_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
-    #image_names = util.load_data.get_address(args.data_path)
 
-    #connect = torch.nn.DataParallel(connect)
+    connect = torch.nn.DataParallel(connect)
 
     scaler = amp.GradScaler(enabled=args.device)
     param_groups = optim_factory.add_weight_decay(connect, args.weight_decay)
@@ -148,8 +147,6 @@ def train(args):
     Loss = util.loss.Fusionloss(1,2).to(device)
     Loss = nn.DataParallel(Loss,device_ids=device_ids)
     
-    # trans_img = util.trans.trans_img().to(device)
-    # trans_img = nn.DataParallel(trans_img,device_ids=device_ids)
     image_mean = torch.tensor([0.485, 0.456, 0.406])
     image_std = torch.tensor([0.229, 0.224, 0.225])
     mean = image_mean.view(1, 3, 1, 1).to(device)
@@ -159,7 +156,6 @@ def train(args):
     for epoch in range(args.start_epoch, args.epochs):
         print('Epoch %d.....' % epoch)
         # load training database
-        #image_random ,batches = util.load_data.load_dataset(image_names ,args.batch_size)
         loss_out_fusion = 0
         loss_out_grad = 0
         loss_out_laplacian = 0
