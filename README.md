@@ -32,6 +32,8 @@ pip install -r requirements.txt
 ```
 **Pre-train Weight for MAE**(resume): https://drive.google.com/file/d/16YnXfUeqBbSprhWV1OygriAsr2y9cCcf/view?usp=sharing
 
+📖 [Pre-training Process Guidance](Pre-training process.md)
+
 **Test Weight**: https://drive.google.com/file/d/18N6tn78VztQOvobVWu6J-RJHo3jsBKkk/view?usp=sharing
 
 
