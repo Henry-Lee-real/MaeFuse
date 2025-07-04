@@ -1,6 +1,6 @@
-# 🔧 How to Train from the Official MAE Model to Our Customized Pre-trained Version
+# How to Train from the Official MAE Model to Our Customized Pre-trained Version
 
-Thank you for your question! This guide explains how to start from the [official MAE model](https://github.com/facebookresearch/mae) and train a customized decoder while keeping the encoder frozen.
+This guide explains how to start from the [official MAE model](https://github.com/facebookresearch/mae) and train a customized decoder while keeping the encoder frozen.
 
 ---
 
