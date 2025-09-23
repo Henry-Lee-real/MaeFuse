@@ -3,6 +3,8 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 *arxiv link:* https://arxiv.org/abs/2404.11016
 
+*official link（TIP）:* https://ieeexplore.ieee.org/document/10893688
+
 Any questions can be consulted -> (Email:lijiayang.cs@gmail.com)
 
 ## **Core Concept**: 
