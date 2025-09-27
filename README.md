@@ -1,6 +1,14 @@
 # MaeFuse
 Official implementation of **MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training** (TIP 2025)
 
+<a href="https://cvpr.thecvf.com/">
+  <img src="https://img.shields.io/badge/CVPR%202024-Accepted-4CAF50?style=flat" alt="CVPR 2024 Accepted">
+</a>
+<a href="https://arxiv.org/abs/2404.07543">
+  <img src="https://img.shields.io/badge/arXiv-2404.07543-b31b1b?logo=arXiv&logoColor=white&style=flat" alt="arXiv">
+</a>
+
+
 *arxiv link:* https://arxiv.org/abs/2404.11016
 
 *official link（TIP）:* https://ieeexplore.ieee.org/document/10893688
