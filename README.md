@@ -2,7 +2,7 @@
 Official implementation of **MaeFuse: Transferring Omni Features with Pretrained Masked Autoencoders for Infrared and Visible Image Fusion via Guided Training** (TIP 2025)
 
 [![arXiv 2404.11016](https://img.shields.io/badge/arXiv-2404.11016-b31b1b?logo=arXiv&logoColor=white&style=flat)](https://arxiv.org/abs/2404.11016)
-[![IEEE TIP | Accept](https://img.shields.io/badge/IEEE%20TIP-Official-00629B?logo=ieee&logoColor=white&style=flat)](https://ieeexplore.ieee.org/document/10893688)
+[![IEEE TIP | Accept](https://img.shields.io/badge/IEEE%20TIP-Accept-00629B?logo=ieee&logoColor=white&style=flat)](https://ieeexplore.ieee.org/document/10893688)
 
 
 Any questions can be consulted -> (Email:lijiayang.cs@gmail.com)
