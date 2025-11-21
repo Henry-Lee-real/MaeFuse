@@ -28,13 +28,13 @@ Note:
 This argument is mainly used to restore MAE + decoder. It may not include weights for later fusion modules such as CFM or MFM.
 
 --fusion_weight
-python
-复制代码
+```python
 parser.add_argument(
     '--fusion_weight',
     default='path/to/fusion/layer/wegt',
     help='Checkpoint for fusion layer (CFM only)'
 )
+```
 Purpose:
 Path to a checkpoint that contains only the fusion layer / CFM + MFM weights.
 
@@ -42,13 +42,13 @@ Intuition:
 Think of this as a lightweight checkpoint, separate from the full model.
 
 --all_weight
-python
-复制代码
+```python
 parser.add_argument(
     '--all_weight',
     default='path/to/fusion/all/wegt',
     help='Checkpoint for the entire model (decoder + CFM + MFM, etc.)'
 )
+```
 Purpose:
 Path to a checkpoint that saves all model parameters, including decoder, CFM, MFM, and possibly other modules.
 
@@ -70,8 +70,7 @@ Rule of thumb
 --all_weight: full-model checkpoint, recommended for multi-stage loading.
 
 2. --training_mode Overview
-python
-复制代码
+```python
 parser.add_argument(
     '--training_mode',
     default="train_decoder_CFM_MFM",
@@ -88,13 +87,14 @@ parser.add_argument(
         'train_decoder_CFM_MFM',
     ]
 )
+```
 We mainly consider three modules:
 
 Decoder: MAE decoder (reconstructs images from latent features).
 
-CFM: Cross Fusion Module (feature-level fusion between two images/modalities).
+CFM: CFM.
 
-MFM: Mask / Multi-stage Fusion Module (additional fusion / refinement module).
+MFM: MFM.
 
 Each training_mode controls:
 
@@ -122,10 +122,6 @@ Trainable modules:
 
 CFM ✅
 
-Decoder ❌ (frozen)
-
-MFM ❌
-
 Loss:
 A mean-based loss using the features from the two input images. CFM learns to fuse features by matching the mean statistics.
 
@@ -138,10 +134,6 @@ Train CFM only, with a fusion loss through the decoder and pixel-level supervisi
 Trainable modules:
 
 CFM ✅
-
-Decoder ❌ (frozen)
-
-MFM ❌
 
 Loss:
 
