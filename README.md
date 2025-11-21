@@ -52,7 +52,7 @@ To use this script, you need to provide the following command-line arguments:
 ```bash
 python train.py
 ```
-
+📖 [Training Process Guidance](./training.md)
 ### Test Command
 
 ```bash
