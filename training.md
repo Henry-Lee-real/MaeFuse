@@ -14,7 +14,7 @@ parser.add_argument(
     default='output_decoder_4_640/checkpoint-50.pth',
     help='Pre-training ckpt for MAE (4-layer decoder)'
 )
-
+```
 Purpose:
 Path to a MAE pre-training checkpoint, typically containing the encoder + a 4-layer decoder.
 
