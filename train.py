@@ -73,6 +73,8 @@ def get_args_parser():
                         help='Pre-training ckpt for MAE(4 layers decoder)')
     parser.add_argument('--fusion_weight', default='path/to/fusion/layer/wegt',
                         help='ckpt for fusion layer (w/o)')
+    parser.add_argument('--all_weight', default='path/to/fusion/all/wegt',
+                        help='ckpt for all layer (w/o)')
     
 
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
@@ -90,6 +92,9 @@ def get_args_parser():
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
+    parser.add_argument('--training_mode',default="train_decoder_CFM_MFM",type=str,choices=['train_CFM_mean','train_CFM_fusion','train_MFM_mean_CFM_lock','train_MFM_fusion_CFM_lock',
+                                                              'train_MFM_mean_CFM_open','train_MFM_fusion_CFM_open','train_decoder_only','train_decoder_MFM','train_decoder_CFM_MFM'],
+                        help='training_mode')
 
     return parser
 
@@ -109,24 +114,30 @@ def train(args):
     #load_model
     mae = models_mae.__dict__[args.model](norm_pix_loss=args.norm_pix_loss)
     
-    fusion_layer = fusion.cross_fusion_FFN(embed_dim=1024) #same as mae
-    ```
+    fusion_layer = fusion.cross_fusion_FFN(embed_dim=1024, mode=args.training_mode) #same as mae
+    """
     Note:
     If you want to load the fusion layer weights trained at a certain stage, please use the following code to load them.
     fusion_layer_wegt = torch.load(args.fusion_weight, map_location="cpu")
     fusion_layer.load_state_dict(fusion_layer_wegt['model'], strict=True)
-    ```
+    """
         
     #load_weight
-    ```
+    """
     "Resume" refers to the overall weights of both the encoder and decoder after retraining the decoder.
-    ```
+    """
     checkpoint_mae = torch.load(args.resume, map_location="cpu")
     mae.load_state_dict(checkpoint_mae['model'], strict=True)
     
-    connect = connect_net.ConnectModel_MAE_Fuion(mae, fusion_layer)
+    connect = connect_net.ConnectModel_MAE_Fuion(mae, fusion_layer, mode=args.training_mode)
     connect = connect.to(device)
     connect = nn.DataParallel(connect, device_ids=device_ids)
+    """
+    Note:
+    If you want to load the all weights trained at a certain stage, please use the following code to load them.
+    all_wegt = torch.load(args.all_weight, map_location="cpu")
+    connect.load_state_dict(all_wegt['model'], strict=True)
+    """
 
     #transform
     data_transform = transforms.Compose([
@@ -166,13 +177,25 @@ def train(args):
             connect.train()
             optimizer.zero_grad()
          
-            imgs_vi_latent = imgs_vi.to(device)
-            imgs_ir_latent = imgs_ir.to(device)
+            imgs_vi = imgs_vi.to(device)
+            imgs_ir = imgs_ir.to(device)
 
             result = connect(imgs_vi, imgs_ir)
-            result = connect.module.model1.unpatchify(result)
             
-            ```
+
+            if args.training_mode == 'train_CFM_mean' or args.training_mode == 'train_MFM_mean_CFM_lock' or args.training_mode == 'train_MFM_mean_CFM_open':
+                vi_latent = connect.module.model1.forward_encoder(imgs_vi)
+                ir_latent = connect.module.model1.forward_encoder(imgs_ir)
+                loss_total  = torch.mean((result - (vi_latent+ir_latent)/2)**2)
+
+            else:
+                result = connect.module.model1.unpatchify(result)
+                recover = trans_img(result, std, mean)  #output_imgs 
+                imgs_vi = trans_img(imgs_vi, std, mean) #vi_imgs
+                imgs_ir = trans_img(imgs_ir, std, mean) #ir_imgs
+                loss_total, loss_grad, loss_laplacian = Loss(recover ,imgs_vi ,imgs_ir)
+            
+            """
             The stage-one mean alignment loss function are: 
             loss_total  = torch.mean((result - (imgs_vi_latent+imgs_ir_latent)/2)**2)
             The stage-two fusion loss function are:
@@ -180,32 +203,28 @@ def train(args):
             imgs_vi = trans_img(imgs_vi, std, mean) #vi_imgs
             imgs_ir = trans_img(imgs_ir, std, mean) #ir_imgs
             loss_total, loss_grad, loss_laplacian = Loss(recover ,imgs_vi ,imgs_ir)
-            ```
+            """
             
-            recover = trans_img(result, std, mean)  #output_imgs 
-            imgs_vi = trans_img(imgs_vi, std, mean) #vi_imgs
-            imgs_ir = trans_img(imgs_ir, std, mean) #ir_imgs
-            loss_total, loss_grad, loss_laplacian = Loss(recover ,imgs_vi ,imgs_ir)
+            
                 
             loss = torch.mean(loss_total)
                 
             loss_out_fusion += torch.mean(loss_total).item()
-            loss_out_grad += torch.mean(loss_grad).item()
-            loss_out_laplacian += torch.mean(loss_laplacian).item()
+            # loss_out_grad += torch.mean(loss_grad).item()
+            # loss_out_laplacian += torch.mean(loss_laplacian).item()
 
             scaler.scale(loss).backward() # type: ignore
             optimizer.step()
 
             count += 1
             
-        print('total: ',loss_out_fusion/count,'laplacian: ',loss_out_laplacian/count,
-              'grad: ',loss_out_grad/count)
+        print('total: ',loss_out_fusion/count)#,'laplacian: ',loss_out_laplacian/count,'grad: ',loss_out_grad/count)
         if args.output_dir and (epoch % 5 == 0 or epoch + 1 == args.epochs):
-            ```
+            """
             Note：
             If you only want to download the Fusion_layer weights, use：  model = fusion_layer.module
             If you want to retain the overall weights, use： model = connect.module
-            ```    
+            """    
             model = connect.module
             torch.save({'model':model.state_dict()}, args.output_dir+'/checkpoint'+str(epoch)+'.pth')  
 

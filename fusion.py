@@ -247,7 +247,7 @@ class cross_fusion_mean(nn.Module):
         return latent
     
 class cross_fusion_FFN(nn.Module):  #tradition cross*2
-    def __init__(self,embed_dim):
+    def __init__(self,embed_dim, mode='eval'):
         super(cross_fusion_FFN, self).__init__()
         self.cross_model = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)
         self.merge_model = nn.MultiheadAttention(embed_dim = embed_dim, num_heads = 16)
@@ -258,10 +258,17 @@ class cross_fusion_FFN(nn.Module):  #tradition cross*2
         self.gelu = nn.GELU()
         self.ln = nn.LayerNorm(self.embed_dim)
         self.initialize_weights()
+        self.mode = mode
+        self._set_trainable_blocks(self.mode)
         
     def initialize_weights(self):
         pos_embed = get_2d_sincos_pos_embed(self.embed_dim, 40, cls_token=False)
         self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
+    
+    def _set_trainable_blocks(self, mode):
+        if mode == 'train_MFM_mean_CFM_lock' or mode == 'train_MFM_fusion_CFM_lock' or mode == 'train_decoder_MFM':
+            for param in self.parameters():
+                param.requires_grad = False
 
     def forward(self, vi_latent, ir_latent):#, com_latent
         #num         = vi_latent.shape[1]
@@ -270,6 +277,8 @@ class cross_fusion_FFN(nn.Module):  #tradition cross*2
         vi_patten,_  = self.cross_model(ir_latent,vi_latent,vi_latent)  #q,k,v
         ir_patten,_  = self.cross_model(vi_latent,ir_latent,ir_latent)
         patten = vi_patten + ir_patten
+        if self.mode == 'train_CFM_mean' or self.mode == 'train_CFM_fusion':
+            return patten
         vi_final,_   = self.merge_model(patten,vi_latent,vi_latent)
         ir_final,_   = self.merge_model(patten,ir_latent,ir_latent)
         fusion    = (vi_final + ir_final)

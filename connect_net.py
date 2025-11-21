@@ -62,12 +62,22 @@ class ConnectModel_open(nn.Module):
         return img1, img2
 
 class ConnectModel_MAE_Fuion(nn.Module):
-    def __init__(self, mae, fusion_layer):
+    def __init__(self, mae, fusion_layer, mode='eval'):
         super(ConnectModel_MAE_Fuion, self).__init__()
         self.model1 = mae
         self.model2 = fusion_layer
-        # for param in self.model1.parameters():
-        #     param.requires_grad = False
+        self.mode = mode
+        self._set_trainable_blocks(self.mode)
+
+        
+    def _set_trainable_blocks(self, mode):
+        if  mode == 'train_decoder_MFM' or mode == 'train_decoder_CFM_MFM':
+            print("Open Decoder")
+        else:
+            print("Close Decoder")
+            for param in self.model1.parameters():
+                param.requires_grad = False
+
     
     def unpatchify(self, x):
         img = self.model1.unpatchify(x)
@@ -85,8 +95,11 @@ class ConnectModel_MAE_Fuion(nn.Module):
             vi_latent = self.model1.forward_encoder(vi)
             ir_latent = self.model1.forward_encoder(ir)
         fusion = self.model2(vi_latent,ir_latent)#,v,i
-        out    = self.model1.forward_decoder(fusion) #fusion
-        return out
+        if self.mode == 'train_decoder_MFM' or self.mode == 'train_decoder_CFM_MFM' or self.mode == 'eval':
+            out = self.model1.forward_decoder(fusion) #fusion
+            return out
+        else:
+            return fusion
     
     
 
