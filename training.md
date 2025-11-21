@@ -1,12 +1,12 @@
 # Training Guide
 
-This document explains the key training arguments in `train.py`, especially how to use different checkpoints and the meaning of each `--training_mode` option for multi-stage training.
+This document explains the major training arguments in **`train.py`**, including how to load different checkpoints and how to use each `--training_mode` option for multi-stage training.
 
 ---
 
-## 1. Checkpoint Arguments
+# 1. Checkpoint Arguments
 
-### `--resume`
+## 1.1 `--resume`
 
 ```python
 parser.add_argument(
@@ -15,19 +15,27 @@ parser.add_argument(
     help='Pre-training ckpt for MAE (4-layer decoder)'
 )
 ```
-Purpose:
-Path to a MAE pre-training checkpoint, typically containing the encoder + a 4-layer decoder.
 
-Typical use cases:
+**Purpose**
+Checkpoint for **MAE pretraining**, typically containing:
 
-Initialize training from a pretrained MAE model.
+* Encoder
+* 4-layer decoder
 
-Resume training of the decoder-based stage from a previously saved checkpoint.
+**Use cases**
 
-Note:
-This argument is mainly used to restore MAE + decoder. It may not include weights for later fusion modules such as CFM or MFM.
+* Initialize training from a pretrained MAE model
+* Resume decoder-based training from a saved checkpoint
 
---fusion_weight
+**Notes**
+
+* Contains **MAE + decoder** only
+* Usually **does NOT** include CFM or MFM weights
+
+---
+
+## 1.2 `--fusion_weight`
+
 ```python
 parser.add_argument(
     '--fusion_weight',
@@ -35,13 +43,19 @@ parser.add_argument(
     help='Checkpoint for fusion layer (CFM only)'
 )
 ```
-Purpose:
-Path to a checkpoint that contains only the fusion layer / CFM + MFM weights.
 
-Intuition:
-Think of this as a lightweight checkpoint, separate from the full model.
+**Purpose**
+Checkpoint containing only **fusion layers** (CFM or MFM).
 
---all_weight
+**Notes**
+
+* Lightweight checkpoint
+* Used when training CFM/MFM independently
+
+---
+
+## 1.3 `--all_weight`
+
 ```python
 parser.add_argument(
     '--all_weight',
@@ -49,27 +63,30 @@ parser.add_argument(
     help='Checkpoint for the entire model (decoder + CFM + MFM, etc.)'
 )
 ```
-Purpose:
-Path to a checkpoint that saves all model parameters, including decoder, CFM, MFM, and possibly other modules.
 
-Source:
-During training, the code will save full-model checkpoints. These can later be used for multi-stage training.
+**Purpose**
+A **full-model checkpoint**, containing:
 
-Typical use cases:
+* Decoder
+* CFM
+* MFM
+* Other related modules
 
-After finishing Stage 1 (e.g., use the resume ckpt), you use this full checkpoint as the initialization for Stage 2.
+**Use cases**
 
-For any later experiment where you want to fully restore the model state from a previous stage.
+* Load as initialization for **multi-stage training**
+* Fully restore model state from a previous training stage
 
-Rule of thumb
+**Rule of thumb**
 
---resume: MAE / decoder-oriented pretraining checkpoint.
+* `--resume` → MAE / decoder checkpoint
+* `--fusion_weight` → fusion module only
+* `--all_weight` → full-model checkpoint for multi-stage loading
 
---fusion_weight: fusion-layer-only checkpoint.
+---
 
---all_weight: full-model checkpoint, recommended for multi-stage loading.
+# 2. `--training_mode` Overview
 
-2. --training_mode Overview
 ```python
 parser.add_argument(
     '--training_mode',
@@ -88,192 +105,151 @@ parser.add_argument(
     ]
 )
 ```
-We mainly consider three modules:
 
-Decoder: MAE decoder (reconstructs images from latent features).
+We consider three modules:
 
-CFM: CFM.
+* **Decoder** — MAE decoder
+* **CFM** — Fusion module
+* **MFM** — Multi-feature module
 
-MFM: MFM.
+Each mode controls:
 
-Each training_mode controls:
+* Which modules are **trainable**
+* Whether CFM is **locked** or **open**
+* Whether the loss is **mean-based** or **fusion-based**
 
-Which modules are trainable (Decoder / CFM / MFM).
+---
 
-Which loss is used:
+# 2.1 CFM-only Training Modes
 
-mean = feature mean-based loss.
+## `train_CFM_mean`
 
-fusion = fusion-based loss (usually at pixel / reconstruction level).
+**Trainable**
 
-Whether CFM is updated:
+* CFM ✅
+* Decoder ❌ (no use)
+* MFM ❌ (no use)
 
-*_CFM_lock = CFM is frozen.
-
-*_CFM_open = CFM is trainable.
-
-Below is the detailed explanation for each mode.
-
-2.1 CFM-only training modes
-train_CFM_mean
-Train CFM only, with a mean-based loss.
-
-Trainable modules:
-
-CFM ✅
-
-Loss:
-A mean-based loss using the features from the two input images. CFM learns to fuse features by matching the mean statistics.
-
-Use case:
-Initial, relatively simple training stage to make CFM learn a stable, average-style fusion behavior.
-
-train_CFM_fusion
-Train CFM only, with a fusion loss through the decoder and pixel-level supervision.
-
-Trainable modules:
-
-CFM ✅
-
-Loss:
-
-Fused features are passed through the (frozen) decoder to reconstruct images.
-
-A fusion / reconstruction loss is computed at the pixel level.
-
-Gradients flow through the decoder into CFM, but only CFM is updated, decoder remains fixed.
-
-Use case:
-Refine CFM using a stronger, task-oriented pixel-level loss while keeping the decoder stable.
-
-2.2 Decoder / Decoder+MFM modes (CFM is frozen)
-train_decoder_only
-Train decoder only, without CFM or MFM.
-
-Trainable modules:
-
-Decoder ✅
-
-CFM ❌
-
-MFM ❌
-
-Use case:
-
-Pretraining the decoder itself so that it has good reconstruction capability.
-
-Later stages can introduce CFM and MFM on top of a strong decoder.
-
-train_decoder_MFM
-Train decoder + MFM, CFM is frozen (or not used), with a fusion loss.
-
-Trainable modules:
-
-Decoder ✅
-
-MFM ✅
-
-CFM ❌
-
-Loss:
-Fusion-based loss (typically at pixel level) that supervises the interaction between MFM and decoder.
-
-Use case:
-
-Given fixed CFM outputs or a setup without CFM, jointly train MFM and the decoder to improve fusion quality.
-
-2.3 Full joint training: Decoder + CFM + MFM
-train_decoder_CFM_MFM
-Train Decoder, CFM, and MFM together, with a fusion loss.
-
-Trainable modules:
-
-Decoder ✅
-
-CFM ✅
-
-MFM ✅
-
-Loss:
-Fusion-based loss (e.g., pixel reconstruction or task-specific fusion loss).
-
-Use case:
-
-Final joint fine-tuning stage.
-
-After the modules have been reasonably initialized (e.g., via previous stages), perform end-to-end training to maximize performance.
-
-2.4 MFM training with CFM locked or open
-These modes focus on training MFM, while controlling whether CFM is updated and whether the loss is mean-based or fusion-based.
-
-train_MFM_mean_CFM_lock
-Train MFM only, CFM is frozen, using a mean-based loss.
-
-Trainable modules:
-
-MFM ✅
-
-CFM ❌ (locked)
-
-Decoder: depends on your implementation (often fixed or partially updated).
-
-Loss:
-Mean-based feature loss (similar to train_CFM_mean, but focusing on MFM).
-
-Use case:
-
-Keep a previously trained CFM fixed.
-
-Let MFM learn a simple, mean-based objective on top of stable CFM outputs.
-
-train_MFM_fusion_CFM_lock
-Train MFM only, CFM is frozen, using a fusion loss.
-
-Trainable modules:
-
-MFM ✅
-
-CFM ❌ (locked)
-
-Loss:
-Fusion-based loss (typically via decoder and pixel-level supervision). Only MFM is updated.
-
-Use case:
-
-Refine MFM under a stronger, task-relevant fusion loss while preserving the CFM weights.
-
-train_MFM_mean_CFM_open
-Train MFM + CFM, using a mean-based loss.
-
-Trainable modules:
-
-MFM ✅
-
-CFM ✅
-
-Loss:
+**Loss**
 Mean-based feature loss.
 
-Use case:
+**Use case**
+Simple initialization stage to stabilize CFM behavior.
 
-Jointly adjust MFM and CFM under a relatively simple objective.
+## `train_CFM_fusion`
 
-Useful after initial pretraining if you want both modules to adapt together but still use a stable, mean-based supervision.
+**Trainable**
 
-train_MFM_fusion_CFM_open
-Train MFM + CFM, using a fusion loss.
+* CFM ✅
+* Decoder ❌ (no use)
+* MFM ❌ (no use)
 
-Trainable modules:
+**Loss**
+Fusion/pixel reconstruction loss via decoder
+(grad flows through decoder but decoder is not updated).
 
-MFM ✅
+**Use case**
+Refine CFM with stronger supervision while keeping decoder stable.
 
-CFM ✅
+---
 
-Loss:
-Fusion-based loss (e.g., decoder-based pixel reconstruction).
+# 2.2 Decoder / Decoder+MFM (CFM Frozen)
 
-Use case:
+## `train_decoder_only`
 
-Strongest joint optimization stage for MFM + CFM.
+**Trainable**
 
-Recommended after having good initial checkpoints (e.g., from --all_weight).
+* Decoder ✅
+* CFM ❌
+* MFM ❌
+
+**Use case**
+Pretrain decoder for strong reconstruction capability.
+
+## `train_decoder_MFM`
+
+**Trainable**
+
+* Decoder ✅
+* MFM ✅
+* CFM ❌
+
+**Loss**
+Fusion-based loss.
+
+**Use case**
+Train decoder and MFM jointly while keeping CFM frozen or unused.
+
+---
+
+# 2.3 Full Joint Training
+
+## `train_decoder_CFM_MFM`
+
+**Trainable**
+
+* Decoder ✅
+* CFM ✅
+* MFM ✅
+
+**Loss**
+Fusion-based loss (pixel reconstruction, etc.)
+
+**Use case**
+Final end-to-end joint fine-tuning after all modules are initialized.
+
+---
+
+# 2.4 MFM Training (CFM Locked or Open)
+
+## `train_MFM_mean_CFM_lock`
+
+**Trainable**
+
+* MFM ✅
+* CFM ❌ (locked)
+
+**Loss**
+Mean-based loss.
+
+**Use case**
+Train MFM only on top of a fixed CFM.
+
+## `train_MFM_fusion_CFM_lock`
+
+**Trainable**
+
+* MFM ✅
+* CFM ❌ (locked)
+
+**Loss**
+Fusion/pixel reconstruction loss.
+
+**Use case**
+Refine MFM under stronger task-oriented supervision.
+
+## `train_MFM_mean_CFM_open`
+
+**Trainable**
+
+* MFM ✅
+* CFM ✅
+
+**Loss**
+Mean-based loss.
+
+**Use case**
+Joint MFM + CFM training under a simpler objective.
+
+## `train_MFM_fusion_CFM_open`
+
+**Trainable**
+
+* MFM ✅
+* CFM ✅
+
+**Loss**
+Fusion/pixel reconstruction loss.
+
+**Use case**
+Strongest optimization stage for MFM + CFM; recommended after loading a good `--all_weight` checkpoint.
