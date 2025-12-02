@@ -95,7 +95,7 @@ class ConnectModel_MAE_Fuion(nn.Module):
             vi_latent = self.model1.forward_encoder(vi)
             ir_latent = self.model1.forward_encoder(ir)
         fusion = self.model2(vi_latent,ir_latent)#,v,i
-        if self.mode == 'train_decoder_MFM' or self.mode == 'train_decoder_CFM_MFM' or self.mode == 'eval':
+        if self.mode == 'train_decoder_MFM' or self.mode == 'train_decoder_CFM_MFM' or self.mode == 'eval' or self.mode == 'train_CFM_mean' or self.mode == 'train_MFM_mean_CFM_lock' or self.mode == 'train_MFM_mean_CFM_open':
             out = self.model1.forward_decoder(fusion) #fusion
             return out
         else:
