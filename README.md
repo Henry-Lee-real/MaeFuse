@@ -65,6 +65,11 @@ python test_fusion.py --checkpoint path_to_weight --address path_to_dataset --ou
 - `--address`: This argument specifies the directory containing the dataset, which should include both visible and infrared images.
 - `--output`: This argument specifies the directory where the fused output images will be saved. If the directory does not exist, it will be created automatically.
 
+### Acknowledgements
+
+We sincerely thank **Yuan Tu (NUE)** for raising many helpful issues and suggestions about the code implementation, which enabled us to refine the project and make it easier for the community to reproduce our results.
+
+
 ### Citation
 ```
 @ARTICLE{10893688,
