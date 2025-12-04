@@ -267,7 +267,7 @@ class cross_fusion_FFN(nn.Module):  #tradition cross*2
     
     def _set_trainable_blocks(self, mode):
         if mode == 'train_MFM_mean_CFM_lock' or mode == 'train_MFM_fusion_CFM_lock' or mode == 'train_decoder_MFM':
-            for param in self.parameters():
+            for param in self.cross_model.parameters():
                 param.requires_grad = False
 
     def forward(self, vi_latent, ir_latent):#, com_latent
