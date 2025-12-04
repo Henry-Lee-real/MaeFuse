@@ -7,6 +7,9 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 Any questions can be consulted -> (Email:lijiayang.cs@gmail.com)
 
+> 🚀 **NEWS:** Our TPAMI 2025 paper *"Towards Unified Semantic and Controllable Image Fusion: A Diffusion Transformer Approach"* is now released — code & models are available at [DiTFuse](https://github.com/Henry-Lee-real/DiTFuse).
+
+
 ## **Core Concept**: 
 
 The mainstream approach often uses downstream tasks to drive fusion, resulting in more explicit object information in the fusion results. However, this leads to increased complexity and overfitting issues. Our core idea is that such complex downstream tasks are unnecessary. Instead, using a pre-trained encoder with high-level semantic information, such as MAE, can solve all problems effectively. The Fig.1 below explains this well. While we use MAE as the pre-trained encoder, you could also use other encoders with better performance, such as VAE.
