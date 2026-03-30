@@ -7,7 +7,7 @@ Official implementation of **MaeFuse: Transferring Omni Features with Pretrained
 
 Any questions can be consulted -> (Email:lijiayang.cs@gmail.com)
 
-> 🚀 **NEWS:** Our TPAMI 2025 paper *"Towards Unified Semantic and Controllable Image Fusion: A Diffusion Transformer Approach"* is now released — code & models are available at [DiTFuse](https://github.com/Henry-Lee-real/DiTFuse).
+> 🚀 **NEWS:** Our TPAMI 2026 paper *"Towards Unified Semantic and Controllable Image Fusion: A Diffusion Transformer Approach"* is now released — code & models are available at [DiTFuse](https://github.com/Henry-Lee-real/DiTFuse).
 
 
 ## **Core Concept**: 
